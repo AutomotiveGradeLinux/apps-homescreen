@@ -14,6 +14,7 @@
         <file>toppanel.qml</file>
         <file>bottompanel.qml</file>
         <file>background_demo.qml</file>
+        <file>background_black.qml</file>
         <file>toppanel_demo.qml</file>
         <file>bottompanel_demo.qml</file>
     </qresource>

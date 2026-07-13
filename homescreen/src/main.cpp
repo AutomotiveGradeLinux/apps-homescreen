@@ -270,6 +270,25 @@ load_agl_shell(QPlatformNativeInterface *native, QQmlApplicationEngine *engine,
 	agl_shell_set_activate_region(agl_shell, output,
 				      x, y, width, height);
 #endif
+
+	// for any other outputs add a back background surface */
+	QList<QScreen *> screens = qApp->screens();
+	for (QScreen *iter : screens) {
+		// skip the one we already have a background set
+		if (screen == iter) {
+			qDebug() << "Skipping screen " << iter->name();
+			continue;
+		}
+
+		QObject *qobj_black_bg;
+		QQmlComponent black_bg_comp(engine, QUrl("qrc:/background_black.qml"));
+		struct wl_surface *black_background =
+			create_component(native, &black_bg_comp, iter, &qobj_black_bg);
+
+		output = getWlOutput(native, iter);
+		agl_shell_set_background(agl_shell, black_background, output);
+		qDebug() << "Setting homescreen to screen  " << iter->name();
+	}
 }
 
 static void
@@ -308,6 +327,23 @@ load_agl_shell_for_ci(QPlatformNativeInterface *native,
 	agl_shell_set_background(agl_shell, bg, output);
 	agl_shell_set_panel(agl_shell, top, output, AGL_SHELL_EDGE_TOP);
 	agl_shell_set_panel(agl_shell, bottom, output, AGL_SHELL_EDGE_BOTTOM);
+
+	// for any other outputs add a back background surface */
+	QList<QScreen *> screens = qApp->screens();
+	for (QScreen *iter : screens) {
+		// skip the one we already have a background set
+		if (screen == iter) {
+			continue;
+		}
+
+		QObject *qobj_black_bg;
+		QQmlComponent black_bg_comp(engine, QUrl("qrc:/background_black.qml"));
+		struct wl_surface *black_background =
+			create_component(native, &black_bg_comp, iter, &qobj_black_bg);
+
+		output = getWlOutput(native, iter);
+		agl_shell_set_background(agl_shell, black_background, output);
+	}
 
 	qDebug() << "CI mode - with multiple surfaces";
 }
